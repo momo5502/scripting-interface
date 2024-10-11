@@ -2,5 +2,8 @@
 
 namespace momo::javascript
 {
-	
+	class javascript_interface
+	{
+		
+	};
 }
