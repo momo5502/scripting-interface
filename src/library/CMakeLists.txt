@@ -1,6 +1,7 @@
 add_library(library
     library.cpp
     library.hpp
+    symbol.hpp
 )
 
 if(WIN32)

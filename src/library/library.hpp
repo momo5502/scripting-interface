@@ -76,9 +76,10 @@ namespace momo
 			return this->handle_;
 		}
 
-		void* get_symbol(const char* symbol) const
+		template <typename T = void>
+		T* get_symbol(const char* symbol) const
 		{
-			return get_library_symbol(this->handle_, symbol);
+			return static_cast<T*>(get_library_symbol(this->handle_, symbol));
 		}
 
 		native_handle get_native_handle() const
@@ -92,7 +93,7 @@ namespace momo
 
 		void release()
 		{
-			if(this->handle_ && this->owns_handle_)
+			if (this->handle_ && this->owns_handle_)
 			{
 				free_library(this->handle_);
 			}
