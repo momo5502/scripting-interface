@@ -15,9 +15,8 @@ javascript_value print_string_array(const std::vector<javascript_value>& argumen
 	}
 
 	const auto array = arguments[0];
-	const auto values = array.get_elements();
 
-	for (const auto& value : values)
+	for (const javascript_value value : array)
 	{
 		puts(value.as<std::string>().c_str());
 	}
@@ -43,9 +42,9 @@ javascript_value initialize_javascript_module(javascript_interface& js, const ja
 {
 	puts("Initializing module...");
 
-	exports.set_property("hello_world", js.create_function(print_hello_world));
-	exports.set_property("print_string_array", js.create_function(print_string_array));
-	exports.set_property("run_js_function", js.create_function(run_js_function));
+	exports["hello_world"] = js.create_function(print_hello_world);
+	exports["print_string_array"] = js.create_function(print_string_array);
+	exports["run_js_function"] = js.create_function(run_js_function);
 
 	return exports;
 }

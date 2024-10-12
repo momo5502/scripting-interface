@@ -12,6 +12,16 @@ namespace momo::javascript
 		return get_active_interface();
 	}
 
+	napi_env javascript_value::get_env() const
+	{
+		return this->js_->get_env();
+	}
+
+	functions& javascript_value::get_functions() const
+	{
+		return this->js_->get_function_interface();
+	}
+
 	javascript_value::javascript_value(javascript_interface& js, const napi_value value)
 		: js_(&js)
 		  , value_(value)
@@ -21,49 +31,49 @@ namespace momo::javascript
 	javascript_value::javascript_value(javascript_interface& js)
 		: js_(&js)
 	{
-		js.get_function_interface().get_undefined(js.get_env(), &this->value_);
+		this->get_functions().get_undefined(js.get_env(), &this->value_);
 	}
 
 	javascript_value::javascript_value(javascript_interface& js, std::nullptr_t)
 		: js_(&js)
 	{
-		js.get_function_interface().get_null(js.get_env(), &this->value_);
+		this->get_functions().get_null(js.get_env(), &this->value_);
 	}
 
 	javascript_value::javascript_value(javascript_interface& js, const bool value)
 		: js_(&js)
 	{
-		js.get_function_interface().get_boolean(js.get_env(), value, &this->value_);
+		this->get_functions().get_boolean(js.get_env(), value, &this->value_);
 	}
 
 	javascript_value::javascript_value(javascript_interface& js, const int64_t value)
 		: js_(&js)
 	{
-		js.get_function_interface().create_int64(js.get_env(), value, &this->value_);
+		this->get_functions().create_int64(js.get_env(), value, &this->value_);
 	}
 
 	javascript_value::javascript_value(javascript_interface& js, const int32_t value)
 		: js_(&js)
 	{
-		js.get_function_interface().create_int32(js.get_env(), value, &this->value_);
+		this->get_functions().create_int32(js.get_env(), value, &this->value_);
 	}
 
 	javascript_value::javascript_value(javascript_interface& js, const uint32_t value)
 		: js_(&js)
 	{
-		js.get_function_interface().create_uint32(js.get_env(), value, &this->value_);
+		this->get_functions().create_uint32(js.get_env(), value, &this->value_);
 	}
 
 	javascript_value::javascript_value(javascript_interface& js, const double value)
 		: js_(&js)
 	{
-		js.get_function_interface().create_double(js.get_env(), value, &this->value_);
+		this->get_functions().create_double(js.get_env(), value, &this->value_);
 	}
 
 	javascript_value::javascript_value(javascript_interface& js, const std::string_view string)
 		: js_(&js)
 	{
-		js.get_function_interface().create_string_utf8(js.get_env(), string.data(), string.size(), &this->value_);
+		this->get_functions().create_string_utf8(js.get_env(), string.data(), string.size(), &this->value_);
 	}
 
 	javascript_value::javascript_value(javascript_interface& js, const uint8_t* data, const size_t length)
@@ -77,14 +87,14 @@ namespace momo::javascript
 			free(ptr);
 		};
 
-		js.get_function_interface().create_external_arraybuffer(js.get_env(), buffer, length, deleter, nullptr,
-		                                                        &this->value_);
+		this->get_functions().create_external_arraybuffer(js.get_env(), buffer, length, deleter, nullptr,
+		                                                  &this->value_);
 	}
 
 	napi_valuetype javascript_value::get_type() const
 	{
 		napi_valuetype type{napi_undefined};
-		this->js_->get_function_interface().typeof_(this->js_->get_env(), this->get(), &type);
+		this->get_functions().typeof_(this->get_env(), this->get(), &type);
 		return type;
 	}
 
@@ -93,7 +103,7 @@ namespace momo::javascript
 		this->assert_type(napi_object);
 
 		napi_value result{};
-		this->js_->get_function_interface().get_property_names(this->js_->get_env(), this->get(), &result);
+		this->get_functions().get_property_names(this->get_env(), this->get(), &result);
 		return javascript_value{*this->js_, result};
 	}
 
@@ -102,8 +112,8 @@ namespace momo::javascript
 		this->assert_type(napi_object);
 
 		const javascript_value key_value{*this->js_, key};
-		this->js_->get_function_interface().set_property(this->js_->get_env(), this->get(), key_value.get(),
-		                                                 value.get());
+		this->get_functions().set_property(this->get_env(), this->get(), key_value.get(),
+		                                   value.get());
 	}
 
 	javascript_value javascript_value::get_property(const std::string& key) const
@@ -113,7 +123,7 @@ namespace momo::javascript
 		napi_value result{};
 		const javascript_value key_value{*this->js_, key};
 
-		this->js_->get_function_interface().get_property(this->js_->get_env(), this->get(), key_value.get(), &result);
+		this->get_functions().get_property(this->get_env(), this->get(), key_value.get(), &result);
 		return javascript_value{*this->js_, result};
 	}
 
@@ -123,8 +133,8 @@ namespace momo::javascript
 
 		bool result{};
 		const javascript_value key_value{*this->js_, key};
-		this->js_->get_function_interface().
-		      delete_property(this->js_->get_env(), this->get(), key_value.get(), &result);
+		this->get_functions().
+		      delete_property(this->get_env(), this->get(), key_value.get(), &result);
 		return result;
 	}
 
@@ -133,7 +143,7 @@ namespace momo::javascript
 		this->assert_type(napi_object);
 
 		uint32_t length{};
-		this->js_->get_function_interface().get_array_length(this->js_->get_env(), this->get(), &length);
+		this->get_functions().get_array_length(this->get_env(), this->get(), &length);
 		return length;
 	}
 
@@ -142,8 +152,8 @@ namespace momo::javascript
 		this->assert_type(napi_object);
 
 		napi_value result{};
-		this->js_->get_function_interface().get_element(this->js_->get_env(), this->get(), static_cast<uint32_t>(index),
-		                                                &result);
+		this->get_functions().get_element(this->get_env(), this->get(), static_cast<uint32_t>(index),
+		                                  &result);
 		return javascript_value{*this->js_, result};
 	}
 
@@ -152,8 +162,8 @@ namespace momo::javascript
 		this->assert_type(napi_object);
 
 		bool result{};
-		this->js_->get_function_interface().delete_element(this->js_->get_env(), this->get(),
-		                                                   static_cast<uint32_t>(index), &result);
+		this->get_functions().delete_element(this->get_env(), this->get(),
+		                                     static_cast<uint32_t>(index), &result);
 		return result;
 	}
 
@@ -161,8 +171,8 @@ namespace momo::javascript
 	{
 		this->assert_type(napi_object);
 
-		this->js_->get_function_interface().set_element(this->js_->get_env(), this->get(), static_cast<uint32_t>(index),
-		                                                value.get());
+		this->get_functions().set_element(this->get_env(), this->get(), static_cast<uint32_t>(index),
+		                                  value.get());
 	}
 
 	std::map<std::string, javascript_value, std::less<>> javascript_value::get_properties() const
@@ -217,9 +227,9 @@ namespace momo::javascript
 		}
 
 		napi_value result{};
-		this->js_->get_function_interface().call_function(this->js_->get_env(), this_argument, this->get(),
-		                                                  arguments.size(),
-		                                                  args.data(), &result);
+		this->get_functions().call_function(this->get_env(), this_argument, this->get(),
+		                                    arguments.size(),
+		                                    args.data(), &result);
 
 		return javascript_value{*this->js_, result};
 	}
@@ -230,7 +240,7 @@ namespace momo::javascript
 		this->assert_type(napi_boolean);
 
 		bool result{};
-		this->js_->get_function_interface().get_value_bool(this->js_->get_env(), this->get(), &result);
+		this->get_functions().get_value_bool(this->get_env(), this->get(), &result);
 		return result;
 	}
 
@@ -240,7 +250,7 @@ namespace momo::javascript
 		this->assert_type(napi_number);
 
 		int64_t result{};
-		this->js_->get_function_interface().get_value_int64(this->js_->get_env(), this->get(), &result);
+		this->get_functions().get_value_int64(this->get_env(), this->get(), &result);
 		return result;
 	}
 
@@ -250,7 +260,7 @@ namespace momo::javascript
 		this->assert_type(napi_number);
 
 		int32_t result{};
-		this->js_->get_function_interface().get_value_int32(this->js_->get_env(), this->get(), &result);
+		this->get_functions().get_value_int32(this->get_env(), this->get(), &result);
 		return result;
 	}
 
@@ -260,7 +270,7 @@ namespace momo::javascript
 		this->assert_type(napi_number);
 
 		uint32_t result{};
-		this->js_->get_function_interface().get_value_uint32(this->js_->get_env(), this->get(), &result);
+		this->get_functions().get_value_uint32(this->get_env(), this->get(), &result);
 		return result;
 	}
 
@@ -270,7 +280,7 @@ namespace momo::javascript
 		this->assert_type(napi_number);
 
 		double result{};
-		this->js_->get_function_interface().get_value_double(this->js_->get_env(), this->get(), &result);
+		this->get_functions().get_value_double(this->get_env(), this->get(), &result);
 		return result;
 	}
 
@@ -280,14 +290,14 @@ namespace momo::javascript
 		this->assert_type(napi_string);
 
 		size_t length{};
-		this->js_->get_function_interface().get_value_string_utf8(this->js_->get_env(), this->get(), nullptr, 0,
-		                                                          &length);
+		this->get_functions().get_value_string_utf8(this->get_env(), this->get(), nullptr, 0,
+		                                            &length);
 
 		std::string result{};
 		result.resize(length + 1);
 
-		this->js_->get_function_interface().get_value_string_utf8(this->js_->get_env(), this->get(), result.data(),
-		                                                          result.size(), &length);
+		this->get_functions().get_value_string_utf8(this->get_env(), this->get(), result.data(),
+		                                            result.size(), &length);
 
 		result.pop_back();
 		return result;
