@@ -4,7 +4,7 @@ namespace momo::javascript
 {
 	namespace
 	{
-		bool is_java_script_library(const library& lib)
+		bool is_javascript_library(const library& lib)
 		{
 			return lib && lib.get_symbol("napi_module_register") != nullptr;
 		}
@@ -18,7 +18,7 @@ namespace momo::javascript
 
 		for (auto& library : modules)
 		{
-			if (is_java_script_library(library))
+			if (is_javascript_library(library))
 			{
 				libraries.emplace_back(std::move(library));
 			}

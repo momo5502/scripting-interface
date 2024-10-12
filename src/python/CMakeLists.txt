@@ -1,5 +1,8 @@
 add_library(python
     python_interface.cpp
+    python_functions.hpp
+    python_library.hpp
+    python_library.cpp
 )
 
 target_link_libraries(python PRIVATE library)
