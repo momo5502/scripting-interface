@@ -1,7 +1,5 @@
-const os = require("os");
-
 const mod = { exports: {} };
-process.dlopen(mod, process.argv[2], os.constants.RTLD_NOW);
+process.dlopen(mod, process.argv[2]);
 
 console.log(mod);
 

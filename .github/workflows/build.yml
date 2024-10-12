@@ -43,10 +43,10 @@ jobs:
       - name: CMake Build
         run: cmake --build --preset=${{matrix.preset}}
 
-      - name: Setup Node.js environment
+      - name: Setup Node.js Environment
         uses: actions/setup-node@v4.0.4
 
-      - name: Run test
+      - name: Run Test
         run: |
           node ./samples/javascript-sample/test.js ./build/${{matrix.preset}}/samples/javascript-sample/javascript-sample.dll
 
@@ -89,10 +89,10 @@ jobs:
       - name: CMake Build
         run: cmake --build --preset=${{matrix.preset}}
 
-      - name: Setup Node.js environment
+      - name: Setup Node.js Environment
         uses: actions/setup-node@v4.0.4
 
-      - name: Run test
+      - name: Run Test
         run: |
           node ./samples/javascript-sample/test.js ./build/${{matrix.preset}}/samples/javascript-sample/libjavascript-sample.so
 
@@ -126,9 +126,9 @@ jobs:
       - name: CMake Build
         run: cmake --build --preset=${{matrix.preset}}
 
-      - name: Setup Node.js environment
+      - name: Setup Node.js Environment
         uses: actions/setup-node@v4.0.4
 
-      - name: Run test
+      - name: Run Test
         run: |
           node ./samples/javascript-sample/test.js ./build/${{matrix.preset}}/samples/javascript-sample/libjavascript-sample.dylib
