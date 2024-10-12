@@ -67,6 +67,7 @@ namespace momo::javascript
 	}
 
 	javascript_value::javascript_value(javascript_interface& js, const uint8_t* data, const size_t length)
+		: js_(&js)
 	{
 		auto* buffer = malloc(std::max(length, static_cast<size_t>(1)));
 		memcpy(buffer, data, length);
