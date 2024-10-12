@@ -38,19 +38,17 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1.13.0
 
       - name: CMake Build
-        run: cmake --workflow --preset=${{matrix.preset}}
+        run: cmake --preset=${{matrix.preset}} -DMOMO_SCRIPTING_ENABLE_SAMPLES=On
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: Windows ${{matrix.configuration}} Artifacts
-          path: |
-            build/${{matrix.preset}}/src/library.exe
-            build/${{matrix.preset}}/src/library.pdb
+      - name: CMake Build
+        run: cmake --build --preset=${{matrix.preset}}
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4.0.4
 
       - name: Run test
         run: |
-          ./build/${{matrix.preset}}/src/library.exe
+          node ./samples/javascript-sample/test.js ./build/${{matrix.preset}}/src/javascript-sample/javascript-sample.dll
 
   build-linux:
     name: Build Linux
@@ -86,18 +84,17 @@ jobs:
           sudo update-alternatives --config g++
 
       - name: CMake Build
-        run: cmake --workflow --preset=${{matrix.preset}}
+        run: cmake --preset=${{matrix.preset}} -DMOMO_SCRIPTING_ENABLE_SAMPLES=On
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: Linux ${{matrix.configuration}} Artifacts
-          path: |
-            build/${{matrix.preset}}/src/library
+      - name: CMake Build
+        run: cmake --build --preset=${{matrix.preset}}
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4.0.4
 
       - name: Run test
         run: |
-          ./build/${{matrix.preset}}/src/library
+          node ./samples/javascript-sample/test.js ./build/${{matrix.preset}}/src/javascript-sample/libjavascript-sample.so
 
   build-mac-arm:
     name: Build macOS
@@ -124,15 +121,14 @@ jobs:
           brew install ninja
 
       - name: CMake Build
-        run: cmake --workflow --preset=${{matrix.preset}}
+        run: cmake --preset=${{matrix.preset}} -DMOMO_SCRIPTING_ENABLE_SAMPLES=On
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: macOS ${{matrix.configuration}} Artifacts
-          path: |
-            build/${{matrix.preset}}/src/library
+      - name: CMake Build
+        run: cmake --build --preset=${{matrix.preset}}
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4.0.4
 
       - name: Run test
         run: |
-          ./build/${{matrix.preset}}/src/library
+          node ./samples/javascript-sample/test.js ./build/${{matrix.preset}}/src/javascript-sample/libjavascript-sample.dylib

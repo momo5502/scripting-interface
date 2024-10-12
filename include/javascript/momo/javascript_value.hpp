@@ -36,6 +36,16 @@ namespace momo::javascript
 
 		javascript_value(javascript_interface& js, const uint8_t* data, size_t length);
 
+		javascript_value(javascript_interface& js, const char* string)
+			: javascript_value(js, std::string_view(string))
+		{
+		}
+
+		javascript_value(javascript_interface& js, const std::string& string)
+			: javascript_value(js, std::string_view(string))
+		{
+		}
+
 		javascript_value(javascript_interface& js, const void* data, const size_t length)
 			: javascript_value(js, static_cast<const uint8_t*>(data), length)
 		{
@@ -54,56 +64,81 @@ namespace momo::javascript
 		}
 #endif
 
-		javascript_value() : javascript_value(get_js())
+		javascript_value()
+			: javascript_value(get_js())
 		{
 		}
 
-		javascript_value(const napi_value value) : javascript_value(get_js(), value)
+		javascript_value(const napi_value value)
+			: javascript_value(get_js(), value)
 		{
 		}
 
-		javascript_value(const std::nullptr_t) : javascript_value(get_js(), nullptr)
+		javascript_value(const std::nullptr_t)
+			: javascript_value(get_js(), nullptr)
 		{
 		}
 
-		javascript_value(const bool value) : javascript_value(get_js(), value)
+		javascript_value(const bool value)
+			: javascript_value(get_js(), value)
 		{
 		}
 
-		javascript_value(const int64_t value) : javascript_value(get_js(), value)
+		javascript_value(const int64_t value)
+			: javascript_value(get_js(), value)
 		{
 		}
 
-		javascript_value(const int32_t value) : javascript_value(get_js(), value)
+		javascript_value(const int32_t value)
+			: javascript_value(get_js(), value)
 		{
 		}
 
-		javascript_value(const uint32_t value) : javascript_value(get_js(), value)
+		javascript_value(const uint32_t value)
+			: javascript_value(get_js(), value)
 		{
 		}
 
-		javascript_value(const double value) : javascript_value(get_js(), value)
+		javascript_value(const double value)
+			: javascript_value(get_js(), value)
 		{
 		}
 
-		javascript_value(const float value) : javascript_value(get_js(), static_cast<double>(value))
+		javascript_value(const float value)
+			: javascript_value(get_js(), static_cast<double>(value))
 		{
 		}
 
-		javascript_value(const std::string_view string) : javascript_value(get_js(), string)
+		javascript_value(const std::string_view string)
+			: javascript_value(get_js(), string)
 		{
 		}
 
-		javascript_value(const uint8_t* data, const size_t length) : javascript_value(get_js(), data, length)
+		javascript_value(const char* string)
+			: javascript_value(get_js(), string)
 		{
 		}
 
-		javascript_value(const void* data, const size_t length) : javascript_value(get_js(), data, length)
+		javascript_value(const std::string& string)
+			: javascript_value(get_js(), string)
+		{
+		}
+
+		javascript_value(const uint8_t* data, const size_t length)
+			: javascript_value(get_js(), data, length)
+		{
+		}
+
+		javascript_value(const void* data, const size_t length)
+			: javascript_value(get_js(), data, length)
 		{
 		}
 
 #ifdef __cpp_lib_span
-		javascript_value(const std::span<const uint8_t> data) : javascript_value(get_js(), data) {}
+		javascript_value(const std::span<const uint8_t> data)
+			: javascript_value(get_js(), data)
+		{
+		}
 #endif
 
 		~javascript_value() = default;
@@ -150,7 +185,7 @@ namespace momo::javascript
 		template <typename T>
 		T as() const;
 
-		operator bool() const
+		explicit operator bool() const
 		{
 			return this->value_ && !this->is_null() && !this->is_undefined();
 		}
@@ -160,29 +195,14 @@ namespace momo::javascript
 		javascript_value get_property(const std::string& key) const;
 		bool delete_property(const std::string& key) const;
 
-		template <typename... Args>
-		void set_property(const std::string& key, Args&&... args) const
-		{
-			const javascript_value value(this->get_interface(), std::forward<Args>(args)...);
-			set_property(key, value);
-		}
-
 		size_t get_length() const;
 		javascript_value get_element(size_t index) const;
 		bool delete_element(size_t index) const;
 		void set_element(size_t index, const javascript_value& value) const;
 
-		template <typename... Args>
-		void set_element(const size_t index, Args&&... args) const
+		void add_element(const javascript_value& value) const
 		{
-			const javascript_value value(this->get_interface(), std::forward<Args>(args)...);
-			set_element(index, value);
-		}
-
-		template <typename... Args>
-		void add_element(Args&&... args) const
-		{
-			set_element(get_length(), std::forward<Args>(args)...);
+			set_element(get_length(), value);
 		}
 
 		std::map<std::string, javascript_value, std::less<>> get_properties() const;
@@ -193,7 +213,7 @@ namespace momo::javascript
 		template <typename... Args>
 		javascript_value operator()(const javascript_value& this_value, Args&&... args) const
 		{
-			const std::vector<javascript_value> arguments{ std::forward<Args>(args)... };
+			const std::vector<javascript_value> arguments{std::forward<Args>(args)...};
 			return this->call(this_value, arguments);
 		}
 

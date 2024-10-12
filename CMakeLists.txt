@@ -9,12 +9,12 @@ project(scripting-interfaces LANGUAGES CXX)
 
 #####################################
 
-#option(HTML_UI_ENABLE_SAMPLE "Enable html-ui sample project" OFF)
+option(MOMO_SCRIPTING_ENABLE_SAMPLES "Enable sample projects" OFF)
 
 #####################################
 
 add_subdirectory(src)
 
-#if(HTML_UI_ENABLE_SAMPLE)
-#  add_subdirectory(sample)
-#endif()
+if(MOMO_SCRIPTING_ENABLE_SAMPLES)
+  add_subdirectory(samples)
+endif()
