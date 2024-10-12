@@ -3,6 +3,8 @@
 #include "javascript_functions.hpp"
 #include "scoped_interface.hpp"
 
+#include <cstring>
+
 namespace momo::javascript
 {
 	javascript_interface& javascript_value::get_js()
@@ -81,7 +83,7 @@ namespace momo::javascript
 	napi_valuetype javascript_value::get_type() const
 	{
 		napi_valuetype type{napi_undefined};
-		this->js_->get_function_interface().typeof(this->js_->get_env(), this->get(), &type);
+		this->js_->get_function_interface().typeof_(this->js_->get_env(), this->get(), &type);
 		return type;
 	}
 

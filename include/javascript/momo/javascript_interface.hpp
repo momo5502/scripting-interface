@@ -1,10 +1,10 @@
 #pragma once
 
-#include <functional>
+#include <list>
 #include <memory>
+#include <functional>
 
 #include "javascript_value.hpp"
-
 #include "export.h"
 
 #define REGISTER_JAVASCRIPT_MODULE(init)                                                  \

@@ -10,7 +10,7 @@ namespace momo::javascript
 {
 	struct functions
 	{
-		symbol<napi_status(napi_env env, napi_value value, napi_valuetype* result)> typeof;
+		symbol<napi_status(napi_env env, napi_value value, napi_valuetype* result)> typeof_;
 		symbol<napi_status(napi_env env, napi_value script, napi_value* result)> run_script;
 		symbol<napi_status(napi_env env, napi_value recv, napi_value func, size_t argc, const napi_value* argv,
 		                   napi_value* result)> call_function;
@@ -65,7 +65,7 @@ namespace momo::javascript
 
 
 		functions(const library& lib)
-			: typeof(lib, "napi_typeof")
+			: typeof_(lib, "napi_typeof")
 			  , run_script(lib, "napi_run_script")
 			  , call_function(lib, "napi_call_function")
 			  , throw_error(lib, "napi_throw_error")

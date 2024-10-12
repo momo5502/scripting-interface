@@ -79,7 +79,7 @@ namespace momo
 		template <typename T = void>
 		T* get_symbol(const char* symbol) const
 		{
-			return static_cast<T*>(get_library_symbol(this->handle_, symbol));
+			return reinterpret_cast<T*>(get_library_symbol(this->handle_, symbol));
 		}
 
 		native_handle get_native_handle() const
