@@ -1,7 +1,10 @@
 #pragma once
 
+#include <cstdint>
+#include <cstddef>
+
 #include <symbol.hpp>
-#include "napi_types.hpp"
+#include <momo/napi_types.hpp>
 
 namespace momo::javascript
 {
@@ -37,6 +40,7 @@ namespace momo::javascript
 		symbol<napi_status(napi_env env, const char* str, size_t length, napi_value* result)> create_string_utf8;
 		symbol<napi_status(napi_env env, napi_value object, napi_value* result)> get_property_names;
 		symbol<napi_status(napi_env env, napi_value* result)> get_global;
+		symbol<napi_status(napi_env env, napi_value* result)> get_null;
 		symbol<napi_status(napi_env env, napi_value* result)> get_undefined;
 		symbol<napi_status(napi_env env, napi_value value, bool* result)> get_value_bool;
 		symbol<napi_status(napi_env env, napi_value value, int64_t* result)> get_value_int64;
@@ -87,6 +91,7 @@ namespace momo::javascript
 			  , create_string_utf8(lib, "napi_create_string_utf8")
 			  , get_property_names(lib, "napi_get_property_names")
 			  , get_global(lib, "napi_get_global")
+			  , get_null(lib, "napi_get_null")
 			  , get_undefined(lib, "napi_get_undefined")
 			  , get_value_bool(lib, "napi_get_value_bool")
 			  , get_value_int64(lib, "napi_get_value_int64")

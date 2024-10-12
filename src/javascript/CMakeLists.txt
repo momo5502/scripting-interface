@@ -2,6 +2,8 @@ add_library(javascript
     javascript_interface.cpp
     javascript_library.cpp
     javascript_library.hpp
+    javascript_value.cpp
+    javascript_functions.hpp
     scoped_interface.cpp
     scoped_interface.hpp
 )
