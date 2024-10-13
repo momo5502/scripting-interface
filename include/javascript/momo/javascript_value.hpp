@@ -386,6 +386,16 @@ namespace momo::javascript
 			return this->value_ && !this->is_null() && !this->is_undefined();
 		}
 
+		bool operator==(const javascript_value& obj) const
+		{
+			return this->value_ == obj.value_;
+		}
+
+		bool operator!=(const javascript_value& obj) const
+		{
+			return !(*this == obj);
+		}
+
 		javascript_value get_property_names() const;
 		void set_property(const std::string& key, const javascript_value& value) const;
 		javascript_value get_property(const std::string& key) const;
