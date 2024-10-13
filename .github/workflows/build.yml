@@ -46,9 +46,16 @@ jobs:
       - name: Setup Node.js Environment
         uses: actions/setup-node@v4.0.4
 
-      - name: Run Test
+      - name: Setup Python Environment
+        uses: actions/setup-python@v5.2.0
+
+      - name: Run JavaScript Test
         run: |
           node ./samples/javascript-sample/test.js ./build/${{matrix.preset}}/samples/javascript-sample/javascript-sample.dll
+
+      - name: Run Python Test
+        run: |
+          python3 ./samples/python-sample/test.py ./build/${{matrix.preset}}/samples/python-sample/python-sample.dll
 
   build-linux:
     name: Build Linux
@@ -92,9 +99,16 @@ jobs:
       - name: Setup Node.js Environment
         uses: actions/setup-node@v4.0.4
 
-      - name: Run Test
+      - name: Setup Python Environment
+        uses: actions/setup-python@v5.2.0
+
+      - name: Run JavaScript Test
         run: |
           node ./samples/javascript-sample/test.js ./build/${{matrix.preset}}/samples/javascript-sample/libjavascript-sample.so
+
+      - name: Run Python Test
+        run: |
+          python3 ./samples/python-sample/test.py ./build/${{matrix.preset}}/samples/python-sample/libpython-sample.so
 
   build-mac-arm:
     name: Build macOS
@@ -129,6 +143,13 @@ jobs:
       - name: Setup Node.js Environment
         uses: actions/setup-node@v4.0.4
 
-      - name: Run Test
+      - name: Setup Python Environment
+        uses: actions/setup-python@v5.2.0
+
+      - name: Run JavaScript Test
         run: |
           node ./samples/javascript-sample/test.js ./build/${{matrix.preset}}/samples/javascript-sample/libjavascript-sample.dylib
+
+      - name: Run Python Test
+        run: |
+          python3 ./samples/python-sample/test.py ./build/${{matrix.preset}}/samples/python-sample/libpython-sample.dylib
