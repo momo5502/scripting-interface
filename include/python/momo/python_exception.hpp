@@ -34,6 +34,5 @@ namespace momo::python
 		python_object type_{};
 		python_object value_{};
 		python_object trace_{};
-
 	};
 }

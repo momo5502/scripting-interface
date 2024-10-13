@@ -31,7 +31,7 @@ MOMO_DLL_EXPORT_C
 void setup_python(PyObjectBorrowed* raw_dict)
 {
 	auto& py = python_interface::get();
-	const python_object dict{py, raw_dict };
+	const python_object dict{py, raw_dict};
 
 	dict["print_string"] = py.create_function(print_string);
 	dict["run_callback"] = py.create_function(run_callback);

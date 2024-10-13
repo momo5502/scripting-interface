@@ -72,7 +72,7 @@ namespace momo::python
 
 			property_accessor(const python_object& value, std::string property)
 				: value_(&value)
-				, property_(std::move(property))
+				  , property_(std::move(property))
 			{
 			}
 		};
@@ -129,7 +129,7 @@ namespace momo::python
 
 			element_accessor(const python_object& value, size_t index)
 				: value_(&value)
-				, index_(index)
+				  , index_(index)
 			{
 			}
 		};
@@ -422,22 +422,22 @@ namespace momo::python
 
 		property_accessor operator[](std::string property) const
 		{
-			return { *this, std::move(property) };
+			return {*this, std::move(property)};
 		}
 
 		element_accessor operator[](const size_t index) const
 		{
-			return { *this, index };
+			return {*this, index};
 		}
 
 		element_iterator begin() const
 		{
-			return { *this, 0 };
+			return {*this, 0};
 		}
 
 		element_iterator end() const
 		{
-			return { *this, this->get_length() };
+			return {*this, this->get_length()};
 		}
 
 	private:

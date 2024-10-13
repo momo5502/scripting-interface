@@ -435,7 +435,7 @@ namespace momo::javascript
 		template <typename... Args>
 		javascript_value operator()(const javascript_value& this_value, Args&&... args) const
 		{
-			const std::vector<javascript_value> arguments{ javascript_value{*this->js_, std::forward<Args>(args)}... };
+			const std::vector<javascript_value> arguments{javascript_value{*this->js_, std::forward<Args>(args)}...};
 			return this->call(this_value, arguments);
 		}
 
