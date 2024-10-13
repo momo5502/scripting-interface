@@ -48,6 +48,8 @@ jobs:
 
       - name: Setup Python Environment
         uses: actions/setup-python@v5.2.0
+        with:
+          python-version: '3.12'
 
       - name: Run JavaScript Test
         run: |
@@ -101,6 +103,8 @@ jobs:
 
       - name: Setup Python Environment
         uses: actions/setup-python@v5.2.0
+        with:
+          python-version: '3.12'
 
       - name: Run JavaScript Test
         run: |
@@ -145,6 +149,8 @@ jobs:
 
       - name: Setup Python Environment
         uses: actions/setup-python@v5.2.0
+        with:
+          python-version: '3.12'
 
       - name: Run JavaScript Test
         run: |
