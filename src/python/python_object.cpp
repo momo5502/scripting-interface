@@ -493,7 +493,7 @@ namespace momo::python
 	{
 		python_interpreter_lock lock{*this->py_};
 		const auto args = this->py_->create_tuple(arguments);
-		return this->call(args, {*this->py_, nullptr});
+		return this->call(args, this->py_->create_dict());
 	}
 
 	template <>
