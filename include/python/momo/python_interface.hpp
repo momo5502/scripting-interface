@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <mutex>
 #include <memory>
 #include <functional>
 
@@ -19,18 +20,19 @@ namespace momo::python
 		python_interface& operator=(python_interface&&) = delete;
 		python_interface& operator=(const python_interface&) = delete;
 
-		/*using initializer_func = javascript_value(javascript_interface& js, const javascript_value& exports);
-		using initializer =	std::function<initializer_func>;
-
-		using handler_complex_func = std::function<javascript_value(javascript_interface&, const javascript_value& this_value, const std::vector<javascript_value>& args)>;
-		using handler_reduced_func = std::function<javascript_value(const javascript_value& this_value, const std::vector<javascript_value>& args)>;
-		using handler_args_func = std::function<javascript_value(const std::vector<javascript_value>& args)>;
-		using handler_slim_func = std::function<javascript_value()>;
-		using handler_min_func = std::function<void()>;*/
+		using handler_complex_func = std::function<python_object(python_interface&, const python_object& args,
+		                                                         const python_object& kwargs)>;
+		using handler_reduced_func = std::function<python_object
+			(const python_object& args, const python_object& kwargs)>;
+		using handler_args_func = std::function<python_object(const python_object& args)>;
+		using handler_slim_func = std::function<python_object()>;
+		using handler_min_func = std::function<void()>;
 
 		struct function_entry
 		{
-			//handler_complex_func handler{};
+			std::string name{};
+			PyMethodDef method_def{};
+			handler_complex_func handler{};
 		};
 
 		functions& get_function_interface() const;
@@ -40,7 +42,7 @@ namespace momo::python
 			return python_interpreter_lock{*this};
 		}
 
-		//python_object create_function(handler_complex_func callback, std::string_view name = {});
+		python_object create_function(handler_complex_func callback, std::string_view name = {});
 
 		python_object create_byte_array(const void* data, size_t length);
 		python_object create_dict();
@@ -51,20 +53,64 @@ namespace momo::python
 
 		python_object get_none()
 		{
-			return { *this, nullptr };
+			return {*this, nullptr};
 		}
 
-		python_object execute(const std::string_view code, const python_object& globals);
+		python_object execute(const std::string& code, const python_object& globals);
 
-		python_object execute(const std::string_view code)
+		python_object execute(const std::string& code)
 		{
 			return this->execute(code, this->get_globals());
 		}
 
 		void check_error();
 
+		python_object create_function(handler_reduced_func callback, const std::string_view name = {})
+		{
+			return this->create_function(
+				[c = std::move(callback)](python_interface& args, const python_object& kwargs, const python_object&)
+				{
+					return c(args, kwargs);
+				}, name);
+		}
+
+		python_object create_function(handler_args_func callback, const std::string_view name = {})
+		{
+			return this->create_function(
+				[c = std::move(callback)](python_interface&, const python_object& args, const python_object&)
+				{
+					return c(args);
+				}, name);
+		}
+
+		python_object create_function(handler_slim_func callback, const std::string_view name = {})
+		{
+			return this->create_function(
+				[c = std::move(callback)](python_interface&, const python_object&, const python_object&)
+				{
+					return c();
+				}, name);
+		}
+
+		python_object create_function(handler_min_func callback, const std::string_view name = {})
+		{
+			return this->create_function(
+				[c = std::move(callback)](python_interface& js, const python_object&, const python_object&)
+				{
+					c();
+					return js.get_none();
+				}, name);
+		}
+
+		static python_interface& get();
+
 	private:
 		std::unique_ptr<functions> functions_{};
+
+		std::mutex mutex_{};
 		std::list<std::unique_ptr<function_entry>> function_entries_{};
+
+		python_interface(std::unique_ptr<functions> functions);
+		~python_interface();
 	};
 }

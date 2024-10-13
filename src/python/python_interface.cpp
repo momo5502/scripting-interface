@@ -4,6 +4,8 @@
 #include "python_functions.hpp"
 
 #include "scoped_interface.hpp"
+#include "momo/python_object.hpp"
+#include "momo/python_object.hpp"
 
 namespace momo::python
 {
@@ -28,67 +30,79 @@ namespace momo::python
 			return f.build_value(args...);
 		}
 
-		/*
-		napi_value native_function_handler(const napi_env env, const napi_callback_info info)
+		PyObject* native_function_handler(PyObjectBorrowed* self, PyObjectBorrowed* args, PyObjectBorrowed* kwargs)
 		{
-			auto* js = get_interface_for_env(env);
-			if (!js)
+			auto& py = python_interface::get();
+			scoped_interface _{py};
+
+			const python_object self_obj{py, self};
+			const python_object args_obj{py, args};
+			const python_object kwargs_obj{py, kwargs};
+
+			auto* ptr = self_obj.as<void*>();
+			const auto& entry = *static_cast<python_interface::function_entry*>(ptr);
+
+			//try
+			//{
+				const auto returnValue = entry.handler(py, args_obj, kwargs_obj);
+				py.check_error();
+
+				return returnValue.get_new_ref();
+			//}
+			/*catch (const PythonException& e)
 			{
-				return nullptr;
+				e.Restore();
 			}
-
-			scoped_interface _{*js};
-
-			size_t argc{};
-			js->get_function_interface().get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
-
-
-			void* entry_ptr{};
-			napi_value this_value{};
-
-			std::vector<napi_value> args{};
-			args.resize(argc);
-
-			js->get_function_interface().get_cb_info(env, info, &argc, args.data(), &this_value, &entry_ptr);
-
-			const auto* entry = static_cast<javascript_interface::function_entry*>(entry_ptr);
-			if (!entry)
+			catch (const std::exception& e)
 			{
-				return nullptr;
-			}
-
-			try
-			{
-				std::vector<javascript_value> arguments{};
-				arguments.reserve(args.size());
-
-				for (const auto& arg : args)
-				{
-					arguments.emplace_back(*js, arg);
-				}
-
-				const javascript_value this_arg{*js, this_value};
-				return entry->handler(*js, this_arg, arguments).get();
-			}
-			catch (std::exception& exception)
-			{
-				js->throw_error(exception.what());
-			}
-			catch (...)
-			{
-				js->throw_error("An unknown error occured during JavaScript handler execution");
-			}
-
-			return nullptr;
-		}*/
+				pythonInterface.SetException(e.what());
+			}*/
+		}
 	}
+
+	python_interface& python_interface::get()
+	{
+		static python_interface py{get_functions()};
+		return py;
+	}
+
+	python_interface::python_interface(std::unique_ptr<functions> functions)
+		: functions_(std::move(functions))
+	{
+	}
+
+	python_interface::~python_interface() = default;
 
 	functions& python_interface::get_function_interface() const
 	{
 		return *this->functions_;
 	}
 
-	//python_object create_function(handler_complex_func callback, std::string_view name = {});
+	python_object python_interface::create_function(handler_complex_func callback, const std::string_view name)
+	{
+		auto container = std::make_unique<function_entry>();
+		container->name = name;
+		container->handler = std::move(callback);
+		container->method_def.ml_name = container->name.c_str();
+		container->method_def.ml_meth = reinterpret_cast<void*>(&native_function_handler);
+		container->method_def.ml_flags = METH_VARARGS | METH_KEYWORDS;
+		container->method_def.ml_doc = nullptr;
+
+		const auto lock = this->acquire_gil();
+
+		const python_object ptr_obj{*this, static_cast<void*>(container.get())};
+		auto* function_obj = this->get_function_interface().c_function_new_ex(
+			&container->method_def, reinterpret_cast<PyObject*>(ptr_obj.borrow()), nullptr);
+
+		python_object result{*this, function_obj};
+
+		{
+			std::lock_guard _{this->mutex_}; // Probably unnecessary because of GIL?
+			this->function_entries_.push_back(std::move(container));
+		}
+
+		return result;
+	}
 
 	python_object python_interface::create_byte_array(const void* data, const size_t length)
 	{
@@ -132,77 +146,22 @@ namespace momo::python
 		return {*this, obj};
 	}
 
-	/*javascript_value javascript_interface::create_function(handler_complex_func callback, const std::string_view name)
+	python_object python_interface::execute(const std::string& code, const python_object& globals)
 	{
-		auto entry = std::make_unique<function_entry>();
-		entry->handler = std::move(callback);
+		const auto lock = this->acquire_gil();
 
-		napi_value value{};
-		this->get_function_interface().create_function(this->get_env(), name.data(), name.size(),
-		                                               native_function_handler, entry.get(), &value);
+		auto* obj = this->get_function_interface().run_string(code.c_str(), Py_file_input,
+		                                                      reinterpret_cast<PyObject*>(globals.borrow()),
+		                                                      nullptr);
+		python_object result{*this, obj};
 
-		this->function_entries_.push_back(std::move(entry));
+		this->check_error();
 
-		return {*this, value};
-	}
-
-	javascript_value javascript_interface::create_object()
-	{
-		napi_value value{};
-		this->get_function_interface().create_object(this->get_env(), &value);
-		return {*this, value};
-	}
-
-	javascript_value javascript_interface::create_array(size_t length)
-	{
-		napi_value value{};
-		this->get_function_interface().create_array(this->get_env(), length, &value);
-		return {*this, value};
-	}
-
-	javascript_value javascript_interface::get_global()
-	{
-		napi_value value{};
-		this->get_function_interface().get_global(this->get_env(), &value);
-		return {*this, value};
-	}
-
-	javascript_value javascript_interface::execute(const std::string_view code)
-	{
-		napi_value result{};
-		const javascript_value code_value{*this, code};
-
-		this->get_function_interface().run_script(this->get_env(), code_value.get(), &result);
-
-		return {*this, result};
-	}
-
-	bool javascript_interface::is_exception_pending() const
-	{
-		bool result{};
-		this->get_function_interface().is_exception_pending(this->get_env(), &result);
 		return result;
 	}
 
-	javascript_value javascript_interface::get_and_clear_exception()
+	void python_interface::check_error()
 	{
-		if (!this->is_exception_pending())
-		{
-			return {*this};
-		}
-
-		napi_value result{};
-		this->get_function_interface().get_and_clear_last_exception(this->get_env(), &result);
-		return {*this, result};
+		// TODO
 	}
-
-	void javascript_interface::throw_error(const std::string& message, const std::string& code) const
-	{
-		this->get_function_interface().throw_error(this->get_env(), code.c_str(), message.c_str());
-	}
-
-	void javascript_interface::throw_value(const javascript_value& error) const
-	{
-		this->get_function_interface().throw_(this->get_env(), error.get());
-	}*/
 }

@@ -50,11 +50,11 @@ namespace momo::python
 		symbol<int (PyObject* obj, char** buffer, Py_ssize_t* length)> bytes_as_string_and_size;
 		symbol<PyObject*(Py_ssize_t len)> tuple_new;
 		symbol<Py_ssize_t (PyObject* p)> tuple_size;
-		symbol<PyObject*(PyObject* p, Py_ssize_t pos)> tuple_get_item;
+		symbol<PyObjectBorrowed*(PyObject* p, Py_ssize_t pos)> tuple_get_item;
 		symbol<int (PyObject* p, Py_ssize_t pos, PyObject* o)> tuple_set_item;
 		symbol<PyObject*(Py_ssize_t len)> list_new;
 		symbol<Py_ssize_t(PyObject* list)> list_size;
-		symbol<PyObject*(PyObject* list, Py_ssize_t index)> list_get_item;
+		symbol<PyObjectBorrowed*(PyObject* list, Py_ssize_t index)> list_get_item;
 		symbol<int (PyObject* list, Py_ssize_t index, PyObject* item)> list_insert;
 		symbol<PyObject*(PyObject* list)> list_as_tuple;
 		symbol<int (PyObject* list, PyObject* item)> list_append;

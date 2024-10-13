@@ -62,7 +62,7 @@ namespace momo::javascript
 		void throw_error(const std::string& message, const std::string& code = "momo") const;
 		void throw_value(const javascript_value& error) const;
 
-		javascript_value create_function(handler_reduced_func callback, std::string_view name = {})
+		javascript_value create_function(handler_reduced_func callback, const std::string_view name = {})
 		{
 			return this->create_function(
 				[c = std::move(callback)](javascript_interface&, const javascript_value& this_value,
@@ -72,7 +72,7 @@ namespace momo::javascript
 				}, name);
 		}
 
-		javascript_value create_function(handler_args_func callback, std::string_view name = {})
+		javascript_value create_function(handler_args_func callback, const std::string_view name = {})
 		{
 			return this->create_function(
 				[c = std::move(callback)](javascript_interface&, const javascript_value&,
@@ -82,7 +82,7 @@ namespace momo::javascript
 				}, name);
 		}
 
-		javascript_value create_function(handler_slim_func callback, std::string_view name = {})
+		javascript_value create_function(handler_slim_func callback, const std::string_view name = {})
 		{
 			return this->create_function(
 				[c = std::move(callback)](javascript_interface&, const javascript_value&,
@@ -92,7 +92,7 @@ namespace momo::javascript
 				}, name);
 		}
 
-		javascript_value create_function(handler_min_func callback, std::string_view name = {})
+		javascript_value create_function(handler_min_func callback, const std::string_view name = {})
 		{
 			return this->create_function(
 				[c = std::move(callback)](javascript_interface& js, const javascript_value&,

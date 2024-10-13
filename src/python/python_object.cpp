@@ -1,3 +1,5 @@
+#include "momo/python_object.hpp"
+
 #include <momo/python_object.hpp>
 #include <momo/python_interpreter_lock.hpp>
 
@@ -35,6 +37,10 @@ namespace momo::python
 		: py_(&py)
 		  , value_(value)
 	{
+		if (!this->value_)
+		{
+			this->value_ = build_value(py, "");
+		}
 	}
 
 	python_object::python_object(python_interface& py, PyObjectBorrowed* value)
@@ -44,7 +50,7 @@ namespace momo::python
 	}
 
 	python_object::python_object(python_interface& py)
-		: py_(&py)
+		: python_object(py, nullptr)
 	{
 	}
 
@@ -56,7 +62,7 @@ namespace momo::python
 	}
 
 	python_object::python_object(python_interface& py, std::nullptr_t)
-		: python_object(py)
+		: python_object(py, static_cast<PyObject*>(nullptr))
 	{
 	}
 
@@ -397,7 +403,7 @@ namespace momo::python
 		auto& f = this->get_functions();
 		python_interpreter_lock lock{f};
 
-		PyObject* obj{nullptr};
+		PyObjectBorrowed* obj{nullptr};
 
 		if (this->is_tuple())
 		{

@@ -17,7 +17,8 @@ namespace momo::python
 			return *current_interface;
 		}
 
-		throw std::runtime_error("No active Python interface");
+		return python_interface::get();
+		//throw std::runtime_error("No active Python interface");
 	}
 
 	scoped_interface::scoped_interface(python_interface& py)
