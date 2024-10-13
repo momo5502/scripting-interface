@@ -15,13 +15,10 @@ python_object print_string(const python_object& args)
 }
 
 MOMO_DLL_EXPORT_C
-PyObject* setup_python()
+void setup_python(PyObjectBorrowed* raw_dict)
 {
 	auto& py = python_interface::get();
+	const python_object dict{py, raw_dict };
 
-	const auto obj = py.create_dict();
-
-	obj.set_attribute("print_string", py.create_function(print_string));
-
-	return obj.get_new_ref();
+	dict.set_property("print_string", py.create_function(print_string));
 }
