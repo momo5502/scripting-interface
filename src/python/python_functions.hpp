@@ -42,7 +42,7 @@ namespace momo::python
 		symbol<PyObject*(PyMethodDef* ml, PyObject* self, PyObject* module)> c_function_new_ex;
 		symbol<int (PyObject* p, const char* key, PyObject* val)> dict_set_item_string;
 		symbol<int (PyObject* p, const char* key)> dict_del_item_string;
-		symbol<PyObject*(PyObject* p, const char* key)> dict_get_item_string;
+		symbol<PyObjectBorrowed*(PyObject* p, const char* key)> dict_get_item_string;
 		symbol<PyObject*(PyObject* p)> dict_keys;
 		symbol<PyObject*(long v)> bool_from_long;
 		symbol<double (PyObject* pyfloat)> float_as_double;
@@ -68,11 +68,11 @@ namespace momo::python
 		symbol<int (PyObject* o, const char* attr_name, PyObject* v)> object_set_attr_string;
 		symbol<PyObject*(const char* name)> import_import_module;
 
-		symbol<void> tuple_type;
-		symbol<void> list_type;
-		symbol<void> dict_type;
-		symbol<void> unicode_type;
-		symbol<void> exc_runtime_error;
+		symbol<PyObject> tuple_type;
+		symbol<PyObject> list_type;
+		symbol<PyObject> dict_type;
+		symbol<PyObject> unicode_type;
+		symbol<PyObject> exc_runtime_error;
 
 		functions(const library& lib)
 			: at_exit(lib, "Py_AtExit")

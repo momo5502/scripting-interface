@@ -55,5 +55,4 @@ namespace momo::javascript
 
 		uint32_t unref() const;
 	};
-
 }

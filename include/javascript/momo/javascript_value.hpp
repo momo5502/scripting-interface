@@ -216,11 +216,6 @@ namespace momo::javascript
 			}
 		};
 
-		const javascript_value& operator*() const
-		{
-			return *this;
-		}
-
 		javascript_value(javascript_interface& js);
 
 		javascript_value(javascript_interface& js, napi_value value);
@@ -304,7 +299,7 @@ namespace momo::javascript
 		}
 
 		javascript_value(const float value)
-			: javascript_value(get_js(), static_cast<double>(value))
+			: javascript_value(get_js(), value)
 		{
 		}
 

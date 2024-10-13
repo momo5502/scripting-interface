@@ -1,124 +1,70 @@
 #pragma once
-#include <string>
+
+#include <list>
 #include <memory>
 #include <functional>
 
-#include <vector>
-#include <functional>
-#include <type_traits>
+#include "python_object.hpp"
+#include "python_interpreter_lock.hpp"
 
-#include "html_value.hpp"
-
-namespace momo
+namespace momo::python
 {
-	namespace detail
-	{
-		using handler_type = std::function<html_value(const std::vector<html_value>&)>;
+	struct functions;
 
-		template <typename T>
-		static T resolve_html_value(const std::vector<html_value>& args, size_t& index)
-		{
-			const auto current_index = index++;
-			return args.at(current_index).as<T>();
-		}
-
-		template <typename F, typename Return, typename... Args>
-		handler_type make_handler(F&& f)
-		{
-			return [fun = std::forward<F>(f)](const std::vector<html_value>& args) -> html_value
-			{
-				if (args.size() != sizeof...(Args))
-				{
-					throw std::runtime_error("Bad argument count");
-				}
-
-				size_t index = 0;
-				std::tuple func_args
-				{
-					resolve_html_value<std::remove_cv_t<std::remove_reference_t<Args>>>(args, index)...
-				};
-
-				(void)index;
-
-				if constexpr (std::is_same_v<Return, void>)
-				{
-					std::apply(fun, std::move(func_args));
-					return {};
-				}
-				else
-				{
-					auto ret = std::apply(fun, std::move(func_args));
-					return html_value(std::move(ret));
-				}
-			};
-		}
-
-		template <typename T>
-		struct callback_creator;
-
-		template <typename Return, typename Class, typename... Args>
-		struct callback_creator<Return(Class::*)(Args...) const>
-		{
-			template <typename F>
-			static handler_type create(F&& func)
-			{
-				return make_handler<F, Return, Args...>(std::forward<F>(func));
-			}
-		};
-
-		template <typename Return, typename... Args>
-		struct callback_creator<Return(*)(Args...)>
-		{
-			template <typename F>
-			static handler_type create(F&& func)
-			{
-				return make_handler<F, Return, Args...>(std::forward<F>(func));
-			}
-		};
-	}
-
-	class html_window;
-
-	class html_ui
+	class python_interface
 	{
 	public:
-		html_ui(const std::string& title, size_t width, size_t height);
-		html_ui(const std::wstring& title, size_t width, size_t height);
-		~html_ui();
+		python_interface(python_interface&&) = delete;
+		python_interface(const python_interface&) = delete;
+		python_interface& operator=(python_interface&&) = delete;
+		python_interface& operator=(const python_interface&) = delete;
 
-		html_ui(const html_ui&) = delete;
-		html_ui& operator=(const html_ui&) = delete;
+		/*using initializer_func = javascript_value(javascript_interface& js, const javascript_value& exports);
+		using initializer =	std::function<initializer_func>;
 
-		html_ui(html_ui&&) noexcept;
-		html_ui& operator=(html_ui&&) noexcept;
+		using handler_complex_func = std::function<javascript_value(javascript_interface&, const javascript_value& this_value, const std::vector<javascript_value>& args)>;
+		using handler_reduced_func = std::function<javascript_value(const javascript_value& this_value, const std::vector<javascript_value>& args)>;
+		using handler_args_func = std::function<javascript_value(const std::vector<javascript_value>& args)>;
+		using handler_slim_func = std::function<javascript_value()>;
+		using handler_min_func = std::function<void()>;*/
 
-		void resize(size_t width, size_t height);
-		bool load_url(const std::string& url);
-		bool load_html(const std::string& html);
-		
-		void close() const;
-
-		html_value evaluate(const std::string& javascript) const;
-
-		void register_raw_handler(const std::string& name, detail::handler_type handler);
-
-		template <typename F>
-		void register_handler(const std::string& name, F&& func)
+		struct function_entry
 		{
-			this->register_raw_handler(
-				name, detail::callback_creator<decltype(&F::operator())>::create(std::forward<F>(func)));
+			//handler_complex_func handler{};
+		};
+
+		functions& get_function_interface() const;
+
+		python_interpreter_lock acquire_gil() const
+		{
+			return python_interpreter_lock{*this};
 		}
 
-		template <typename Return, typename... Args>
-		void register_handler(const std::string& name, Return(*func)(Args...))
+		//python_object create_function(handler_complex_func callback, std::string_view name = {});
+
+		python_object create_byte_array(const void* data, size_t length);
+		python_object create_dict();
+		python_object create_list();
+		python_object create_tuple(const std::vector<python_object>& values);
+
+		python_object get_globals();
+
+		python_object get_none()
 		{
-			using FunctionType = Return(*)(Args...);
-			this->register_raw_handler(name, detail::callback_creator<FunctionType>::create(func));
+			return { *this, nullptr };
 		}
 
-		static void show_windows();
+		python_object execute(const std::string_view code, const python_object& globals);
+
+		python_object execute(const std::string_view code)
+		{
+			return this->execute(code, this->get_globals());
+		}
+
+		void check_error();
 
 	private:
-		std::unique_ptr<html_window> window_;
+		std::unique_ptr<functions> functions_{};
+		std::list<std::unique_ptr<function_entry>> function_entries_{};
 	};
 }

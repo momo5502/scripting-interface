@@ -3,6 +3,10 @@ add_library(python
     python_functions.hpp
     python_library.hpp
     python_library.cpp
+    python_object.cpp
+    python_interpreter_lock.cpp
+    scoped_interface.cpp
+    scoped_interface.hpp
 )
 
 target_link_libraries(python PRIVATE library)

@@ -14,6 +14,7 @@ namespace momo::python
 	using Py_ssize_t = ptrdiff_t;
 
 	struct PyObject;
+	struct PyObjectBorrowed;
 	struct PyThreadState;
 
 	using PyGILState_STATE = struct PyGILState_STATE__*;
