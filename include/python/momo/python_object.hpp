@@ -23,6 +23,199 @@ namespace momo::python
 	class python_object
 	{
 	public:
+		class property_accessor
+		{
+		public:
+			friend python_object;
+
+			~property_accessor() = default;
+
+			property_accessor(property_accessor&&) noexcept = default;
+			property_accessor& operator=(property_accessor&&) noexcept = default;
+
+			property_accessor(const property_accessor&) = delete;
+
+			property_accessor& operator=(const property_accessor& obj)
+			{
+				if (this != &obj)
+				{
+					this->assign(obj.get());
+				}
+
+				return *this;
+			}
+
+			property_accessor& operator=(const python_object& obj)
+			{
+				this->assign(obj);
+				return *this;
+			}
+
+			operator python_object() const
+			{
+				return this->get();
+			}
+
+			void assign(const python_object& value) const
+			{
+				this->value_->set_property(this->property_, value);
+			}
+
+			python_object get() const
+			{
+				return this->value_->get_property(this->property_);
+			}
+
+		private:
+			const python_object* value_{};
+			std::string property_{};
+
+			property_accessor(const python_object& value, std::string property)
+				: value_(&value)
+				, property_(std::move(property))
+			{
+			}
+		};
+
+		class element_iterator;
+
+		class element_accessor
+		{
+		public:
+			friend python_object;
+			friend element_iterator;
+
+			~element_accessor() = default;
+
+			element_accessor(element_accessor&&) noexcept = default;
+			element_accessor& operator=(element_accessor&&) noexcept = default;
+
+			element_accessor(const element_accessor&) = delete;
+
+			element_accessor& operator=(const element_accessor& obj)
+			{
+				if (this != &obj)
+				{
+					this->assign(obj.get());
+				}
+
+				return *this;
+			}
+
+			element_accessor& operator=(const python_object& obj)
+			{
+				this->assign(obj);
+				return *this;
+			}
+
+			operator python_object() const
+			{
+				return this->get();
+			}
+
+			void assign(const python_object& value) const
+			{
+				this->value_->set_element(this->index_, value);
+			}
+
+			python_object get() const
+			{
+				return this->value_->get_element(this->index_);
+			}
+
+		private:
+			const python_object* value_{};
+			size_t index_{};
+
+			element_accessor(const python_object& value, size_t index)
+				: value_(&value)
+				, index_(index)
+			{
+			}
+		};
+
+		class element_iterator
+		{
+		public:
+			friend python_object;
+
+			~element_iterator() = default;
+
+			element_iterator(element_iterator&& obj) noexcept
+				: element_iterator(obj.accessor_)
+			{
+			}
+
+			element_iterator& operator=(element_iterator&& obj) noexcept
+			{
+				this->operator=(obj);
+				return *this;
+			}
+
+			element_iterator(const element_iterator& obj) noexcept
+				: element_iterator(obj.accessor_)
+			{
+			}
+
+			element_iterator& operator=(const element_iterator& obj) noexcept
+			{
+				if (this != &obj)
+				{
+					this->accessor_.value_ = obj.accessor_.value_;
+					this->accessor_.index_ = obj.accessor_.index_;
+				}
+
+				return *this;
+			}
+
+			element_accessor& operator*()
+			{
+				return this->accessor_;
+			}
+
+			const element_accessor& operator*() const
+			{
+				return this->accessor_;
+			}
+
+			element_iterator& operator++()
+			{
+				++this->accessor_.index_;
+				return *this;
+			}
+
+			element_iterator operator++(int)
+			{
+				element_iterator temp = *this;
+				++(*this);
+				return temp;
+			}
+
+			bool operator==(const element_iterator& other) const
+			{
+				return this->accessor_.index_ == other.accessor_.index_ && this->accessor_.value_ == other.accessor_.
+					value_;
+			}
+
+			bool operator!=(const element_iterator& other) const
+			{
+				return !(*this == other);
+			}
+
+		private:
+			element_accessor accessor_;
+
+			element_iterator(const python_object& value, const size_t index)
+				: accessor_(value, index)
+			{
+			}
+
+			element_iterator(const element_accessor& accessor)
+				: element_iterator(accessor.value_, accessor.index_)
+			{
+			}
+		};
+
 		python_object(python_interface& py);
 		python_object(python_interface& py, python_object obj);
 
@@ -225,6 +418,26 @@ namespace momo::python
 		{
 			this->inc_ref();
 			return this->value_;
+		}
+
+		property_accessor operator[](std::string property) const
+		{
+			return { *this, std::move(property) };
+		}
+
+		element_accessor operator[](const size_t index) const
+		{
+			return { *this, index };
+		}
+
+		element_iterator begin() const
+		{
+			return { *this, 0 };
+		}
+
+		element_iterator end() const
+		{
+			return { *this, this->get_length() };
 		}
 
 	private:

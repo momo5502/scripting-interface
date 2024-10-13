@@ -21,7 +21,7 @@ python_object run_callback(const python_object& args)
 		return false;
 	}
 
-	const auto callback = args.get_element(0);
+	const python_object callback = args[0];
 	callback("Hello from C++");
 
 	return true;
@@ -33,6 +33,6 @@ void setup_python(PyObjectBorrowed* raw_dict)
 	auto& py = python_interface::get();
 	const python_object dict{py, raw_dict };
 
-	dict.set_property("print_string", py.create_function(print_string));
-	dict.set_property("run_callback", py.create_function(run_callback));
+	dict["print_string"] = py.create_function(print_string);
+	dict["run_callback"] = py.create_function(run_callback);
 }
