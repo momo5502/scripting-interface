@@ -3,7 +3,7 @@
 
 using namespace momo::python;
 
-python_object print_string(const python_object& args)
+python_object print_string(python_interface& py, const python_object& args, const python_object&)
 {
 	if (args.get_length() != 1)
 	{
@@ -11,6 +11,9 @@ python_object print_string(const python_object& args)
 	}
 
 	puts(args.get_element(0).as<std::string>().c_str());
+
+	py.execute("print('Hello World 2')");
+
 	return true;
 }
 
