@@ -218,6 +218,8 @@ namespace momo::javascript
 
 		javascript_value(javascript_interface& js);
 
+		javascript_value(javascript_interface& js, const javascript_value& obj);
+
 		javascript_value(javascript_interface& js, napi_value value);
 		javascript_value(javascript_interface& js, std::nullptr_t);
 
@@ -433,7 +435,7 @@ namespace momo::javascript
 		template <typename... Args>
 		javascript_value operator()(const javascript_value& this_value, Args&&... args) const
 		{
-			const std::vector<javascript_value> arguments{std::forward<Args>(args)...};
+			const std::vector<javascript_value> arguments{ javascript_value{*this->js_, std::forward<Args>(args)}... };
 			return this->call(this_value, arguments);
 		}
 

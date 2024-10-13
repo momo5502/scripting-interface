@@ -212,7 +212,7 @@ namespace momo::python
 		template <typename... Args>
 		python_object operator()(Args&&... args) const
 		{
-			const std::vector<python_object> arguments{std::forward<Args>(args)...};
+			const std::vector<python_object> arguments{python_object{*this->py_, std::forward<Args>(args)}...};
 			return this->call(arguments);
 		}
 

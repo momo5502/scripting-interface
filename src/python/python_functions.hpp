@@ -61,12 +61,14 @@ namespace momo::python
 		symbol<int (PyObject* list, Py_ssize_t index, PyObject* item)> list_set_item;
 		symbol<int (PyObject* inst, PyObject* cls)> object_is_instance;
 		symbol<const char*(PyObject* unicode, Py_ssize_t* size)> unicode_as_utf8_and_size;
+		symbol<PyObject*(const char* str, Py_ssize_t size)> unicode_from_string_and_size;
 		symbol<PyObject*(PyObject* o)> object_str;
 		symbol<void (PyObject* type, const char* message)> err_set_string;
 		symbol<PyObject*(PyObject* o, const char* attr_name)> object_get_attr_string;
 		symbol<int (PyObject* o, const char* attr_name)> object_has_attr_string;
 		symbol<int (PyObject* o, const char* attr_name, PyObject* v)> object_set_attr_string;
 		symbol<PyObject*(const char* name)> import_import_module;
+		symbol<PyObject*(const char* v, Py_ssize_t len)> bytes_from_string_and_size;
 
 		symbol<PyObject> tuple_type;
 		symbol<PyObject> list_type;
@@ -125,12 +127,14 @@ namespace momo::python
 			  , list_set_item(lib, "PyList_SetItem")
 			  , object_is_instance(lib, "PyObject_IsInstance")
 			  , unicode_as_utf8_and_size(lib, "PyUnicode_AsUTF8AndSize")
+			  , unicode_from_string_and_size(lib, "PyUnicode_FromStringAndSize")
 			  , object_str(lib, "PyObject_Str")
 			  , err_set_string(lib, "PyErr_SetString")
 			  , object_get_attr_string(lib, "PyObject_GetAttrString")
 			  , object_has_attr_string(lib, "PyObject_HasAttrString")
 			  , object_set_attr_string(lib, "PyObject_SetAttrString")
 			  , import_import_module(lib, "PyImport_ImportModule")
+			  , bytes_from_string_and_size(lib, "PyBytes_FromStringAndSize")
 			  , tuple_type(lib, "PyTuple_Type")
 			  , list_type(lib, "PyList_Type")
 			  , dict_type(lib, "PyDict_Type")

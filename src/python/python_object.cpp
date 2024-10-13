@@ -1,14 +1,8 @@
 #include "momo/python_object.hpp"
-
-#include <momo/python_object.hpp>
 #include <momo/python_interpreter_lock.hpp>
 
 #include "python_functions.hpp"
 #include "scoped_interface.hpp"
-
-#include <cstring>
-
-#include "python_functions.hpp"
 
 namespace momo::python
 {
@@ -103,8 +97,11 @@ namespace momo::python
 
 	python_object::python_object(python_interface& py, const std::string_view string)
 		: py_(&py)
-		  , value_(build_value(py, "s#", string.data(), string.size()))
 	{
+		auto& f = py.get_function_interface();
+
+		python_interpreter_lock lock{f};
+		this->value_ = f.unicode_from_string_and_size(string.data(), static_cast<Py_ssize_t>(string.size()));
 	}
 
 
@@ -119,8 +116,12 @@ namespace momo::python
 
 	python_object::python_object(python_interface& py, const uint8_t* data, const size_t length)
 		: py_(&py)
-		  , value_(build_value(py, "y#", data, length))
 	{
+		auto& f = py.get_function_interface();
+
+		python_interpreter_lock lock{f};
+		this->value_ = f.bytes_from_string_and_size(reinterpret_cast<const char*>(data),
+		                                            static_cast<Py_ssize_t>(length));
 	}
 
 	python_object::python_object(python_object&& obj) noexcept

@@ -3,6 +3,7 @@
 #include "javascript_functions.hpp"
 #include "scoped_interface.hpp"
 
+#include <cassert>
 #include <cstring>
 
 namespace momo::javascript
@@ -20,6 +21,13 @@ namespace momo::javascript
 	functions& javascript_value::get_functions() const
 	{
 		return this->js_->get_function_interface();
+	}
+
+	javascript_value::javascript_value(javascript_interface& js, const javascript_value& obj)
+		: js_(&js)
+		  , value_(obj.value_)
+	{
+		assert(this->js_ == obj.js_);
 	}
 
 	javascript_value::javascript_value(javascript_interface& js, const napi_value value)
