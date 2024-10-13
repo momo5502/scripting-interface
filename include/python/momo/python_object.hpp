@@ -359,7 +359,17 @@ namespace momo::python
 
 		explicit operator bool() const
 		{
-			return this->value_;
+			return this->value_ && *this != python_object{*this->py_, nullptr};
+		}
+
+		bool operator==(const python_object& obj) const
+		{
+			return this->value_ == obj.value_;
+		}
+
+		bool operator!=(const python_object& obj) const
+		{
+			return !(*this == obj);
 		}
 
 		void inc_ref() const;
