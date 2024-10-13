@@ -2,9 +2,11 @@
 
 using namespace momo::javascript;
 
-void print_hello_world()
+javascript_value print_hello_world(javascript_interface& js, const javascript_value&, const std::vector<javascript_value>&)
 {
 	puts("Hello World");
+	js.execute("console.log('Hello World 2')");
+	return {};
 }
 
 javascript_value print_string_array(const std::vector<javascript_value>& arguments)
