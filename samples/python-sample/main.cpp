@@ -22,7 +22,7 @@ python_object run_callback(const python_object& args)
 	}
 
 	const auto callback = args.get_element(0);
-	callback("Hello form C++");
+	callback("Hello from C++");
 
 	return true;
 }
