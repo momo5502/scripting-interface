@@ -63,7 +63,10 @@ namespace momo::python
 			return this->execute(code, this->get_globals());
 		}
 
+		bool is_exception_pending() const;
+
 		void check_error();
+		void throw_exception(const std::string& message) const;
 
 		python_object create_function(handler_reduced_func callback, const std::string_view name = {})
 		{

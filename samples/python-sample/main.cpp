@@ -10,7 +10,7 @@ python_object print_string(const python_object& args)
 		return false;
 	}
 
-	puts(args.get_element(0).as_string().as<std::string>().c_str());
+	puts(args.get_element(0).as<std::string>().c_str());
 	return true;
 }
 

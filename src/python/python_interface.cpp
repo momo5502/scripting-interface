@@ -1,11 +1,10 @@
 #include <momo/python_interface.hpp>
+#include <momo/python_exception.hpp>
 
 #include "python_library.hpp"
 #include "python_functions.hpp"
 
 #include "scoped_interface.hpp"
-#include "momo/python_object.hpp"
-#include "momo/python_object.hpp"
 
 namespace momo::python
 {
@@ -42,21 +41,27 @@ namespace momo::python
 			auto* ptr = self_obj.as<void*>();
 			const auto& entry = *static_cast<python_interface::function_entry*>(ptr);
 
-			//try
-			//{
+			try
+			{
 				const auto returnValue = entry.handler(py, args_obj, kwargs_obj);
 				py.check_error();
 
 				return returnValue.get_new_ref();
-			//}
-			/*catch (const PythonException& e)
+			}
+			catch (const python_exception& e)
 			{
-				e.Restore();
+				e.restore();
 			}
 			catch (const std::exception& e)
 			{
-				pythonInterface.SetException(e.what());
-			}*/
+				py.throw_exception(e.what());
+			}
+			catch (...)
+			{
+				py.throw_exception("An unknown error occured during Python handler execution");
+			}
+
+			return py.get_none().get_new_ref();
 		}
 	}
 
@@ -160,8 +165,26 @@ namespace momo::python
 		return result;
 	}
 
+	bool python_interface::is_exception_pending() const
+	{
+		const auto lock = this->acquire_gil();
+		return this->get_function_interface().err_occurred();
+	}
+
 	void python_interface::check_error()
 	{
-		// TODO
+		const auto lock = this->acquire_gil();
+		if (this->is_exception_pending())
+		{
+			throw python_exception(*this);
+		}
+	}
+
+	void python_interface::throw_exception(const std::string& message) const
+	{
+		const auto lock = this->acquire_gil();
+
+		const auto& f = this->get_function_interface();
+		f.err_set_string(f.exc_runtime_error, message.c_str());
 	}
 }

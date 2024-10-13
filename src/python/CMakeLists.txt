@@ -4,6 +4,7 @@ add_library(python
     python_library.hpp
     python_library.cpp
     python_object.cpp
+    python_exception.cpp
     python_interpreter_lock.cpp
     scoped_interface.cpp
     scoped_interface.hpp
