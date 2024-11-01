@@ -47,7 +47,7 @@ jobs:
         uses: actions/setup-node@v4.0.4
 
       - name: Setup Python Environment
-        uses: actions/setup-python@v5.2.0
+        uses: actions/setup-python@v5.3.0
         with:
           python-version: '3.12'
 
@@ -102,7 +102,7 @@ jobs:
         uses: actions/setup-node@v4.0.4
 
       - name: Setup Python Environment
-        uses: actions/setup-python@v5.2.0
+        uses: actions/setup-python@v5.3.0
         with:
           python-version: '3.12'
 
@@ -148,7 +148,7 @@ jobs:
         uses: actions/setup-node@v4.0.4
 
       - name: Setup Python Environment
-        uses: actions/setup-python@v5.2.0
+        uses: actions/setup-python@v5.3.0
         with:
           python-version: '3.12'
 
